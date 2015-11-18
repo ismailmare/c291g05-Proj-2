@@ -196,6 +196,10 @@ def phase1():
 
 
 def phase2():
+
+	sort$ rterms.txt | uniq -u
+	sort$ pterms.txt | uniq -u
+	sort$ scores.txt | uniq -u
 	return 
 
 #---------------------------------------------------------------
@@ -228,7 +232,11 @@ def phase3():
 
 def main():
 	#	This is an example of reading file from stdin and printing contents
-	org_file = open(sys.argv[1])
+	try:
+		org_file = open(sys.argv[1])
+	except:
+		print("Input file not provided!")
+		return
 	replaced_file = open('file.txt','w')
 
 	for line in org_file:
@@ -239,7 +247,17 @@ def main():
 	replaced_file.close()
 
 	phase1()
+	phase2()
 	return
+
+
+
+
+
+
+
+
+
 
 
 main()
