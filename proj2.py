@@ -16,7 +16,8 @@ import random
 import time
 import string
 import sys
-
+import subprocess
+from bsddb3 import db
 
 
 
@@ -196,10 +197,23 @@ def phase1():
 
 
 def phase2():
+	subprocess.Popen('sort rterms.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.Popen('sort pterms.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.Popen('sort scores.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
 
-	sort$ rterms.txt | uniq -u
-	sort$ pterms.txt | uniq -u
-	sort$ scores.txt | uniq -u
+	database = db.DB() 
+	database.open("rw.rdx",None, db.DB_BTREE,db.DB_CREATE)
+	database.open("pt.rdx",None, db.DB_BTREE,db.DB_CREATE)
+	database.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database.open("sc.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs=database.cursor()
+	curs.close()
+	#database.close()
+
+
+
+
 	return 
 
 #---------------------------------------------------------------
@@ -235,7 +249,7 @@ def main():
 	try:
 		org_file = open(sys.argv[1])
 	except:
-		print("Input file not provided!")
+		print("\n"+"Input file not provided!"+"\n")
 		return
 	replaced_file = open('file.txt','w')
 
@@ -247,13 +261,10 @@ def main():
 	replaced_file.close()
 
 	phase1()
-	phase2()
+	#phase2()
+	#phase3()
+
 	return
-
-
-
-
-
 
 
 
