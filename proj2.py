@@ -334,33 +334,127 @@ def phase2():
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 3
+
 def review_search(text):
-	
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+
+
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
 	return
 
-def product_search(text):
 
+
+def product_search(text):
+	database_pt = db.DB()
+	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_rt.cursor()
+
+
+
+
+
+
+
+	curs_pt.close()
+	database_pt.close()
 	return
 
 def full_search(text):
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+	database_pt = db.DB()
+	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_pt.cursor()
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
+	curs_pt.close()
+	database_pt.close()	
+
 	return
+
+
+
 
 def price_search(price,sign,value):
 	#need to read in price in database
+	database_rw = db.DB()
+	database_rw.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rw=database_rw.cursor()
+
+
+
+
+
+	curs_rw.close()
+	database_rw.close()
 
 	return
+
+
+
+
 
 def date_search(command,sign,date):
 
 	return
 
+
+
+
+
+
 def part_search(part_word):
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+	database_pt = db.DB()
+	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_pt.cursor()
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
+	curs_pt.close()
+	database_pt.close()	
 
 	return
+
+
+
+
+
 
 def score_search(score,sign,value):
+	database_rw = db.DB()
+	database_rw.open("rw.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rw=database_rw.cursor()
 
+
+
+
+
+
+	curs_rw.close()
+	database_rw.close()
 	return
+
+
+
+
 
 def phase3():
 	global query
@@ -375,7 +469,7 @@ def phase3():
 			if 'p:' in command:
 				product_search(command)
 			elif 'r:' in command:
-				review_search(text)
+				review_search(command)
 			elif 'pp' in command:
 				price_search(command,query[i+1],query[i+2])
 			elif 'rdate' in command:
@@ -386,8 +480,6 @@ def phase3():
 				part_search(command)
 			else:
 				full_search(command)
-			print(command)
-
 
 
 	print("\nHave a nice day!\n")
@@ -397,7 +489,7 @@ def phase3():
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-
+# Main()
 
 
 def main():
