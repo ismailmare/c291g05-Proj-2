@@ -30,24 +30,29 @@ def pterms():
 	file=open('file.txt','r')
 	target = open('pterms.txt','w')
 	review=0
-	a=0
-	list_words=['']*5
+	newword=''
+	review=0
+
 	for line in file:
-		
 		if 'product/title:' in line:
-			a=0
 			line=line[len('product/title '):]
-			list_words=['']*50
 			review+=1
-			for char in line:
-				if char.isalnum()==True:
-					list_words[a]+=str(char)
-				else:
-					a=a+1
-			for word in list_words:
+			line_array=line.split()
+			for words in line_array: 
+				word=''
+				for char in words:
+					if char.isalnum()==True:
+						word+=str(char)
+					else:
+						newword=word
+						word=''
+						if len(newword)>=3:
+							newword=newword.lower()+str(',')+str(review)+'\n'
+							target.write(newword)
 				if len(word)>=3:
 					word=word.lower()+str(',')+str(review)+'\n'
 					target.write(word)
+	
 	file.close()
 	target.close()
 
@@ -194,25 +199,78 @@ def phase1():
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 2
-
+def db_load_prep(filename):
+	target=open(filename,'r')
+	write=(filename.split('.'))[0]+"_load"+".txt"
+	write1=open(write,'w')
+	for line in target:
+		second_half=''
+		contents=line.split(',')
+		write1.write(contents[0])
+		write1.write('\n')
+		for i in range(1,len(contents)):
+			second_half+=contents[i]
+		write1.write(second_half)
+	target.close()
+	write1.close()
+	return
+def db_load_prep_reviews(filename):
+	target=open(filename,'r')
+	write=(filename.split('.'))[0]+"_load"+".txt"
+	write1=open(write,'w')
+	for line in target:
+		second_half=''
+		contents=line.split(',')
+		write1.write(contents[0])
+		write1.write('\n')
+		for i in range(1,len(contents)):
+			if i > 1:
+				second_half+=","+contents[i]
+			else:
+				second_half+=contents[i]
+		write1.write(second_half)
+	target.close()
+	write1.close()
 
 def phase2():
-	subprocess.Popen('sort rterms.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-	subprocess.Popen('sort pterms.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-	subprocess.Popen('sort scores.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-	
+	subprocess.call('sort rterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('sort pterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('sort scores.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-	database = db.DB() 
-	database.open("rw.rdx",None, db.DB_BTREE,db.DB_CREATE)
-	database.open("pt.rdx",None, db.DB_BTREE,db.DB_CREATE)
-	database.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
-	database.open("sc.rdx",None,db.DB_BTREE,db.DB_CREATE)
-	curs=database.cursor()
-	curs.close()
-	#database.close()
+	database_rw = db.DB()
+	database_pt = db.DB()
+	database_rt = db.DB()
+	database_sc = db.DB() 
 
+	database_rw.open("rw.rdx",None,db.DB_HASH,db.DB_CREATE)
+	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_sc.open("sc.rdx",None,db.DB_BTREE,db.DB_CREATE)
 
+	db_load_prep("scores.txt") #Now files loaded for db called: scores_load.txt
+	db_load_prep("pterms.txt") #Now files loaded for db called: pterms_load.txt
+	db_load_prep("rterms.txt") #Now files loaded for db called: rterms_load.txt
+	db_load_prep_reviews("reviews.txt") #Now files loaded for db called: reviews_load.txt
 
+	curs_rw=database_rw.cursor()
+	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	curs_rw.close()
+	database_rw.close()
+
+	curs_rt=database_rt.cursor()
+	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	curs_rt.close()
+	database_rt.close()
+
+	curs_pt=database_pt.cursor()
+	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	curs_pt.close()
+	database_pt.close()
+
+	curs_sc=database_sc.cursor()
+	subprocess.call('db_load -f scores_load.txt -T -t btree sc.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	curs_sc.close()
+	database_sc.close()
 
 	return 
 
@@ -255,13 +313,13 @@ def main():
 
 	for line in org_file:
 		line=line.replace('"','&quot;')
-		line=line.replace("\"","\\")
+		line=line.replace("\\","\\\\")
 		replaced_file.write(line)
 	org_file.close()
 	replaced_file.close()
 
 	phase1()
-	#phase2()
+	phase2()
 	#phase3()
 
 	return
