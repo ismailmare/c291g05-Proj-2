@@ -181,10 +181,12 @@ def scores():
 	f.close()
 
 	return
+
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 1
+
 def phase1():
 	reviews()
 	pterms()
@@ -194,11 +196,12 @@ def phase1():
 
 
 
-
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 2
+
+
 def db_load_prep(filename):
 	target=open(filename,'r')
 	write=(filename.split('.'))[0]+"_load"+".txt"
@@ -214,6 +217,10 @@ def db_load_prep(filename):
 	target.close()
 	write1.close()
 	return
+
+
+
+
 def db_load_prep_reviews(filename):
 	target=open(filename,'r')
 	write=(filename.split('.'))[0]+"_load"+".txt"
@@ -232,6 +239,8 @@ def db_load_prep_reviews(filename):
 	target.close()
 	write1.close()
 
+
+
 def phase2():
 	subprocess.call('sort rterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 	subprocess.call('sort pterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -240,7 +249,9 @@ def phase2():
 	database_rw = db.DB()
 	database_pt = db.DB()
 	database_rt = db.DB()
-	database_sc = db.DB() 
+	database_sc = db.DB()
+
+	database_sc.set_flags(db.DB_DUP) 
 
 	database_rw.open("rw.rdx",None,db.DB_HASH,db.DB_CREATE)
 	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
@@ -254,21 +265,53 @@ def phase2():
 
 	curs_rw=database_rw.cursor()
 	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+	#test#################
+	#iter = curs_rw.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_rw.next()
+	######################
+
 	curs_rw.close()
 	database_rw.close()
 
 	curs_rt=database_rt.cursor()
 	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_rt.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_rt.next()
+	######################
+
 	curs_rt.close()
 	database_rt.close()
 
 	curs_pt=database_pt.cursor()
 	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_pt.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_pt.next()
+	######################
+
 	curs_pt.close()
 	database_pt.close()
 
 	curs_sc=database_sc.cursor()
 	subprocess.call('db_load -f scores_load.txt -T -t btree sc.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_sc.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_sc.next()
+	######################
+
 	curs_sc.close()
 	database_sc.close()
 
@@ -291,9 +334,64 @@ def phase2():
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 3
+def review_search(text):
+	
+	return
 
+def product_search(text):
+
+	return
+
+def full_search(text):
+	return
+
+def price_search(price,sign,value):
+	#need to read in price in database
+
+	return
+
+def date_search(command,sign,date):
+
+	return
+
+def part_search(part_word):
+
+	return
+
+def score_search(score,sign,value):
+
+	return
 
 def phase3():
+	global query
+	while True:
+		query=input("\nPlease enter your Query, (q) to quit: ")
+		print('\n')
+		if query=='q':
+			break
+		query=query.split()
+		for i in range(len(query)):
+			command=query[i]
+			if 'p:' in command:
+				product_search(command)
+			elif 'r:' in command:
+				review_search(text)
+			elif 'pp' in command:
+				price_search(command,query[i+1],query[i+2])
+			elif 'rdate' in command:
+				date_search(command,query[i+1],query[i+2])
+			elif 'rscore' in command:
+				score_search(command,query[i+1],query[i+2])
+			elif '%' in command:
+				part_search(command)
+			else:
+				full_search(command)
+			print(command)
+
+
+
+	print("\nHave a nice day!\n")
+	
 	return 
 
 #---------------------------------------------------------------
@@ -320,7 +418,7 @@ def main():
 
 	phase1()
 	phase2()
-	#phase3()
+	phase3()
 
 	return
 
