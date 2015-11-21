@@ -345,6 +345,9 @@ def product_search(text):
 	while iter:
 		
 		iter=curs_sc.next()
+	curs_pt=database_rt.cursor()
+
+
 
 
 
@@ -397,6 +400,7 @@ def price_search(price,sign,value):
 def date_search(command,sign,date):
 	#read in time
 	#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+
 	return
 
 
@@ -449,6 +453,7 @@ def phase3():
 	global query
 	while True:
 		print("\nWelcome to the Query Interface\n")
+		
 		query=input("\nPlease enter your Query, (q) to quit: ")
 		print('\n')
 		if query=='q':
