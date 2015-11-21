@@ -359,21 +359,22 @@ def product_search(text):
 
 
 def full_search(text):
-	database_rt = db.DB()
-	database_rt.open("rt.rdx")
-	curs_rt=database_rt.cursor()
-	database_pt = db.DB()
-	database_pt.open("rt.rdx")
-	curs_pt=database_pt.cursor()
+	database_rw = db.DB()
+	database_rw.open("rw.rdx")
+	curs_rw=database_rw.cursor()
+
+	iter = curs_rw.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
+		if text in data.decode("utf-8"):
+			list.append(key.decode("utf-8"))
+		iter=curs_rw.next()
 
 
 
-
-	curs_rt.close()
-	database_rt.close()
-	curs_pt.close()
-	database_pt.close()	
-
+	curs_rw.close()
+	database_rw.close()
 	return
 
 
@@ -509,7 +510,7 @@ def phase3():
 			elif '%' in command:
 				part_search(command)
 			else:
-				if (len(command)>=3 and command.isalnum()=True):
+				if ((len(command)>=3) and (command.isalnum()==True)):
 					full_search(command)
 			list=set(list)
 			list=sorted(list)
