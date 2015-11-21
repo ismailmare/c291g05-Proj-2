@@ -17,6 +17,7 @@ import time
 import string
 import sys
 import subprocess
+import re
 from bsddb3 import db
 
 
@@ -26,33 +27,25 @@ from bsddb3 import db
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
+
 def pterms():
 	file=open('file.txt','r')
 	target = open('pterms.txt','w')
 	review=0
 	newword=''
-	review=0
 
 	for line in file:
 		if 'product/title:' in line:
 			line=line[len('product/title '):]
 			review+=1
-			line_array=line.split()
-			for words in line_array: 
-				word=''
-				for char in words:
-					if char.isalnum()==True:
-						word+=str(char)
-					else:
-						newword=word
-						word=''
-						if len(newword)>=3:
-							newword=newword.lower()+str(',')+str(review)+'\n'
-							target.write(newword)
+			strippedList=re.sub('[^0-9a-zA-Z_]',' ',line)
+			#pattern = re.compile('([^\s\w]|_)+')
+			#strippedList = pattern.sub(' ', line)
+			strippedList=strippedList.split()
+			for word in strippedList:
 				if len(word)>=3:
-					word=word.lower()+str(',')+str(review)+'\n'
-					target.write(word)
-	
+					newword=word.lower()+str(',')+str(review)+'\n'
+					target.write(newword)
 	file.close()
 	target.close()
 
@@ -114,55 +107,47 @@ def reviews():
 	f.close()
 	return
 
+
 def rterms():
-	
-	target = open('rterms.txt', 'w')
-	f=open('file.txt','r')
+	file=open('file.txt','r')
+	target = open('rterms.txt','w')
+	review=1
 	newword=''
-	review=0
+	read=False
+	read1=False
 
-	for line in f:
-		if 'review/summary:' in line:
+	for line in file:
+		if 'review/summary' in line:
+			read= True
 			line=line[len('review/summary '):]
+			strippedList=re.sub('[^0-9a-zA-Z_]',' ',line)
+			#pattern = re.compile('([^\s\w]|_)+')
+			#strippedList = pattern.sub(' ', line)
+			strippedList=strippedList.split()
+			for word in strippedList:
+				if len(word)>=3:
+					newword=word.lower()+str(',')+str(review)+'\n'
+					target.write(newword)
+
+		if 'review/text' in line:
+			read1= True
+			line=line[len('review/text '):]
+			strippedList=re.sub('[^0-9a-zA-Z_]',' ',line)
+			#pattern = re.compile('([^\s\w]|_)+')
+			#strippedList = pattern.sub(' ', line)
+			strippedList=strippedList.split()
+			for word in strippedList:
+				if len(word)>=3:
+					newword=word.lower()+str(',')+str(review)+'\n'
+					target.write(newword)
+		if (read==True) and (read1==True):
 			review+=1
-			line_array=line.split()
-			for words in line_array: 
-				word=''
-				for char in words:
-					if char.isalnum()==True:
-						word+=str(char)
-					else:
-						newword=word
-						word=''
-						if len(newword)>=3:
-							newword=newword.lower()+str(',')+str(review)+'\n'
-							target.write(newword)
-				if len(word)>=3:
-					word=word.lower()+str(',')+str(review)+'\n'
-					target.write(word)
+			read=False
+			read1=False
 
-		elif 'review/text:' in line:
-			line=line[len('review/text: '):]
-			line_array=line.split()
-			for words in line_array:
-				word=''
-				for char in words:
-					if char.isalnum()==True:
-						word+=str(char)
-					else:
-						newword=word
-						word=''
-						if len(newword)>=3:
-							newword=newword.lower()+str(',')+str(review)+'\n'
-							target.write(newword)
-				if len(word)>=3:
-					word=word.lower()+str(',')+str(review)+'\n'
-					target.write(word)
-				
+	file.close()
 	target.close()
-	f.close()
 
-	return 
 
 
 def scores():
@@ -181,10 +166,12 @@ def scores():
 	f.close()
 
 	return
+
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 1
+
 def phase1():
 	reviews()
 	pterms()
@@ -194,11 +181,12 @@ def phase1():
 
 
 
-
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #PHASE 2
+
+
 def db_load_prep(filename):
 	target=open(filename,'r')
 	write=(filename.split('.'))[0]+"_load"+".txt"
@@ -214,6 +202,10 @@ def db_load_prep(filename):
 	target.close()
 	write1.close()
 	return
+
+
+
+
 def db_load_prep_reviews(filename):
 	target=open(filename,'r')
 	write=(filename.split('.'))[0]+"_load"+".txt"
@@ -232,15 +224,19 @@ def db_load_prep_reviews(filename):
 	target.close()
 	write1.close()
 
+
+
 def phase2():
-	subprocess.call('sort rterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-	subprocess.call('sort pterms.txt | uniq -u',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-	subprocess.call('sort scores.txt | uniq -u', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('sort rterms.txt | uniq -u',shell=True)
+	subprocess.call('sort pterms.txt | uniq -u',shell=True)
+	subprocess.call('sort scores.txt | uniq -u', shell=True)
 
 	database_rw = db.DB()
 	database_pt = db.DB()
 	database_rt = db.DB()
-	database_sc = db.DB() 
+	database_sc = db.DB()
+
+	database_sc.set_flags(db.DB_DUP) 
 
 	database_rw.open("rw.rdx",None,db.DB_HASH,db.DB_CREATE)
 	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
@@ -254,21 +250,53 @@ def phase2():
 
 	curs_rw=database_rw.cursor()
 	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+	#test#################
+	#iter = curs_rw.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_rw.next()
+	######################
+
 	curs_rw.close()
 	database_rw.close()
 
 	curs_rt=database_rt.cursor()
 	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_rt.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_rt.next()
+	######################
+
 	curs_rt.close()
 	database_rt.close()
 
 	curs_pt=database_pt.cursor()
 	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_pt.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_pt.next()
+	######################
+
 	curs_pt.close()
 	database_pt.close()
 
 	curs_sc=database_sc.cursor()
 	subprocess.call('db_load -f scores_load.txt -T -t btree sc.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	
+	#test#################
+	#iter = curs_sc.first()
+	#while iter:
+	#	print(iter)
+	#	iter=curs_sc.next()
+	######################
+
 	curs_sc.close()
 	database_sc.close()
 
@@ -292,14 +320,166 @@ def phase2():
 #---------------------------------------------------------------
 #PHASE 3
 
+def review_search(text):
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+
+
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
+	return
+
+
+
+def product_search(text):
+	database_pt = db.DB()
+	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_pt.cursor()
+
+	iter = curs_pt.first()
+	while iter:
+		
+		iter=curs_sc.next()
+
+
+
+
+
+	curs_pt.close()
+	database_pt.close()
+	return
+
+def full_search(text):
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+	database_pt = db.DB()
+	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_pt.cursor()
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
+	curs_pt.close()
+	database_pt.close()	
+
+	return
+
+
+
+
+def price_search(price,sign,value):
+	#need to read in price in database
+	database_rw = db.DB()
+	database_rw.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rw=database_rw.cursor()
+
+
+
+
+
+	curs_rw.close()
+	database_rw.close()
+
+	return
+
+
+
+
+
+def date_search(command,sign,date):
+	#read in time
+	#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+	return
+
+
+
+
+
+
+def part_search(part_word):
+	database_rt = db.DB()
+	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rt=database_rt.cursor()
+	database_pt = db.DB()
+	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_pt=database_pt.cursor()
+
+
+
+
+	curs_rt.close()
+	database_rt.close()
+	curs_pt.close()
+	database_pt.close()	
+
+	return
+
+
+
+
+
+
+def score_search(score,sign,value):
+	database_rw = db.DB()
+	database_rw.open("rw.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	curs_rw=database_rw.cursor()
+
+
+
+
+
+
+	curs_rw.close()
+	database_rw.close()
+	return
+
+
+
+
 
 def phase3():
+	global query
+	while True:
+		print("\nWelcome to the Query Interface\n")
+		query=input("\nPlease enter your Query, (q) to quit: ")
+		print('\n')
+		if query=='q':
+			break
+		query=query.split()
+		for i in range(len(query)):
+			command=query[i]
+			if 'p:' in command:
+				product_search(command)
+			elif 'r:' in command:
+				review_search(command)
+			elif 'pp' in command:
+				price_search(command,query[i+1],query[i+2])
+			elif 'rdate' in command:
+				date_search(command,query[i+1],query[i+2])
+			elif 'rscore' in command:
+				score_search(command,query[i+1],query[i+2])
+			elif '%' in command:
+				part_search(command)
+			else:
+				full_search(command)
+
+
+	print("\nHave a nice day!\n")
+	
 	return 
 
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-
+# Main()
 
 
 def main():
@@ -320,7 +500,7 @@ def main():
 
 	phase1()
 	phase2()
-	#phase3()
+	phase3()
 
 	return
 
