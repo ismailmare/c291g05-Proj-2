@@ -237,6 +237,9 @@ def phase2():
 	database_sc = db.DB()
 
 	database_sc.set_flags(db.DB_DUP) 
+	database_rt.set_flags(db.DB_DUP) 
+	database_pt.set_flags(db.DB_DUP)
+
 
 	database_rw.open("rw.rdx",None,db.DB_HASH,db.DB_CREATE)
 	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
@@ -249,8 +252,7 @@ def phase2():
 	db_load_prep_reviews("reviews.txt") #Now files loaded for db called: reviews_load.txt
 
 	curs_rw=database_rw.cursor()
-	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-
+	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.rdx',shell=True)
 	#test#################
 	#iter = curs_rw.first()
 	#while iter:
@@ -262,7 +264,7 @@ def phase2():
 	database_rw.close()
 
 	curs_rt=database_rt.cursor()
-	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.rdx',shell=True)
 	
 	#test#################
 	#iter = curs_rt.first()
@@ -275,7 +277,7 @@ def phase2():
 	database_rt.close()
 
 	curs_pt=database_pt.cursor()
-	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.rdx',shell=True)
 	
 	#test#################
 	#iter = curs_pt.first()
@@ -288,7 +290,7 @@ def phase2():
 	database_pt.close()
 
 	curs_sc=database_sc.cursor()
-	subprocess.call('db_load -f scores_load.txt -T -t btree sc.rdx',shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+	subprocess.call('db_load -f scores_load.txt -T -t btree sc.rdx',shell=True)
 	
 	#test#################
 	#iter = curs_sc.first()
@@ -322,47 +324,46 @@ def phase2():
 
 def review_search(text):
 	database_rt = db.DB()
-	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rt.open("rt.rdx")
 	curs_rt=database_rt.cursor()
 
-
-
-
-
+	iter = curs_rt.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
+		if text == key.decode("utf-8"):
+			list.append(data.decode("utf-8"))
+		iter=curs_rt.next()
 
 	curs_rt.close()
 	database_rt.close()
 	return
 
-
-
 def product_search(text):
 	database_pt = db.DB()
-	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_pt.open("pt.rdx")
 	curs_pt=database_pt.cursor()
 
 	iter = curs_pt.first()
 	while iter:
-		
-		iter=curs_sc.next()
-	curs_pt=database_rt.cursor()
-
-
-
-
-
-
+		data = iter[1]
+		key=iter[0]
+		if text == key.decode("utf-8"):
+			list.append(data.decode("utf-8"))
+		iter=curs_pt.next()
 
 	curs_pt.close()
 	database_pt.close()
 	return
 
+
+
 def full_search(text):
 	database_rt = db.DB()
-	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rt.open("rt.rdx")
 	curs_rt=database_rt.cursor()
 	database_pt = db.DB()
-	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_pt.open("rt.rdx")
 	curs_pt=database_pt.cursor()
 
 
@@ -381,7 +382,7 @@ def full_search(text):
 def price_search(price,sign,value):
 	#need to read in price in database
 	database_rw = db.DB()
-	database_rw.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rw.open("rt.rdx")
 	curs_rw=database_rw.cursor()
 
 
@@ -410,10 +411,10 @@ def date_search(command,sign,date):
 
 def part_search(part_word):
 	database_rt = db.DB()
-	database_rt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rt.open("rt.rdx")
 	curs_rt=database_rt.cursor()
 	database_pt = db.DB()
-	database_pt.open("rt.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_pt.open("rt.rdx")
 	curs_pt=database_pt.cursor()
 
 
@@ -433,10 +434,8 @@ def part_search(part_word):
 
 def score_search(score,sign,value):
 	database_rw = db.DB()
-	database_rw.open("rw.rdx",None,db.DB_BTREE,db.DB_CREATE)
+	database_rw.open("rw.rdx")
 	curs_rw=database_rw.cursor()
-
-
 
 
 
@@ -445,27 +444,63 @@ def score_search(score,sign,value):
 	database_rw.close()
 	return
 
+def update_list():
+	global list
+	if len(list)==0:
+		return
+	else:
+		for i in list:
+			new_list.append(i)
+		list=[]
+	return
 
-
-
+def check():
+	global new_list
+	global list
+	if len(new_list)==0:
+		return
+	update=[]
+	if len(list)>=len(new_list):
+		for i in list:
+			if i in new_list:
+				update.append(i)
+	else:
+		for i in new_list:
+			if i in list:
+				update.append(i)
+	new_list=update
+	list=new_list
+	return
 
 def phase3():
+
+	database_rw = db.DB()
+	database_rw.open("rw.rdx")
+	curs_rw=database_rw.cursor()
+	global new_list
+	new_list=[]
+	global list
+	list=[]
 	global query
+	print("\nWelcome to the Query Interface\n")
 	while True:
-		print("\nWelcome to the Query Interface\n")
-		
+		list=[]
+		new_list=[]
 		query=input("\nPlease enter your Query, (q) to quit: ")
 		print('\n')
 		if query=='q':
 			break
 		query=query.split()
 		for i in range(len(query)):
+			update_list()
 			command=query[i]
 			if 'p:' in command:
+				command=command[len('p:'):]
 				product_search(command)
 			elif 'r:' in command:
+				command=command[len('r:'):]
 				review_search(command)
-			elif 'pp' in command:
+			elif 'pprice' in command:
 				price_search(command,query[i+1],query[i+2])
 			elif 'rdate' in command:
 				date_search(command,query[i+1],query[i+2])
@@ -474,11 +509,28 @@ def phase3():
 			elif '%' in command:
 				part_search(command)
 			else:
-				full_search(command)
+				if (len(command)>=3 and command.isalnum()=True):
+					full_search(command)
+			list=set(list)
+			list=sorted(list)
+			check()
+
+		iter=curs_rw.first()
+		while iter:
+			data = iter[1]
+			key=iter[0]
+			if key.decode("utf-8") in list:
+				print('\n')
+				print(data.decode("utf-8"))
+			iter=curs_rw.next()
+
+
+
 
 
 	print("\nHave a nice day!\n")
-	
+	curs_rw.close()
+	database_rw.close()
 	return 
 
 #---------------------------------------------------------------
@@ -506,6 +558,10 @@ def main():
 	phase1()
 	phase2()
 	phase3()
+	subprocess.call('rm rt.rdx',shell=True)
+	subprocess.call('rm pt.rdx',shell=True)
+	subprocess.call('rm sc.rdx',shell=True)
+	subprocess.call('rm rw.rdx',shell=True)
 
 	return
 
