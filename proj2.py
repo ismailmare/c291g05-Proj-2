@@ -340,19 +340,6 @@ def review_search(text):
 	return
 
 
-#Preyanshu
-def product_search(text):
-	database_pt = db.DB()
-	database_pt.open("pt.rdx",None,db.DB_BTREE,db.DB_CREATE)
-	curs_pt=database_rt.cursor()
-        #product_list=[]
-        iter = curs_rt.first()
-	while iter:
-	print(iter)
-		iter=curs_rt.next()
-                if text in iter[1]:
-                        print(iter[1])
-
 def product_search(text):
 	database_pt = db.DB()
 	database_pt.open("pt.rdx")
@@ -392,15 +379,17 @@ def full_search(text):
 
 
 
-
+#preyanshu
 def price_search(price,sign,value):
 	#need to read in price in database
 	database_rw = db.DB()
 	database_rw.open("rt.rdx")
 	curs_rw=database_rw.cursor()
-
-
-
+	curs_pt=database_pt.cursor()
+	iter = curs_pt.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
 
 
 	curs_rw.close()
