@@ -397,9 +397,13 @@ def price_search(price,sign,value):
 	while iter:
 		key=iter[0]
 		data=iter[1]
-		
-		for line in reader(data):
-			
+		PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
+		PATTERN.split(data)[1::2]
+		priceitem=data[2]
+		try :
+			priceitem=int(priceitem)
+		except:
+			iter=curs_rw.next()
 		if sign =="=":
 			if value == priceitem:
 				list.append(key.decode("utf-8"))
