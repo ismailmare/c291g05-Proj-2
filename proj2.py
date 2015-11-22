@@ -18,6 +18,7 @@ import string
 import sys
 import subprocess
 import re
+from csv import reader
 from bsddb3 import db
 
 
@@ -381,15 +382,39 @@ def full_search(text):
 
 #preyanshu
 def price_search(price,sign,value):
-	#need to read in price in database
+	#The 8th query is the same as the third query except the query 
+	#only returns those records where price is present and has a 
+	#value less than 60. Note that there is no index on the price 
+	#field; this field is checked after retrieving the candidate 
+	#records using conditions on which indexes are available 
+	#(e.g. terms) need to read in price in database
+
 	database_rw = db.DB()
 	database_rw.open("rt.rdx")
 	curs_rw=database_rw.cursor()
 	curs_pt=database_pt.cursor()
 	iter = curs_pt.first()
 	while iter:
-		data = iter[1]
 		key=iter[0]
+		data=iter[1]
+		
+		for line in reader(data):
+			
+		if sign =="=":
+			if value == priceitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+
+		elif sign == "<":
+			if value < priceitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		elif sign == ">":
+			if value >priceitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		else:
+			iter=curs_rw.next()
 
 
 	curs_rw.close()
@@ -417,7 +442,7 @@ def part_search(part_word):
 	database_rt.open("rt.rdx")
 	curs_rt=database_rt.cursor()
 	database_pt = db.DB()
-	database_pt.open("rt.rdx")
+	datbase_pt.open("rt.rdx")
 	curs_pt=database_pt.cursor()
 
 
