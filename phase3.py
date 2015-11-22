@@ -100,7 +100,10 @@ def part_search(part_word):
 	database_rw.open("rw.idx")
 	curs_rw=database_rt.cursor()
 
-
+	#try and use _.startswith('word') helps a lot
+	#A = 'heloobelonie'
+	#if A.startswith('heloobelonie'):
+	#print(A)
 
 
 
