@@ -401,7 +401,10 @@ def price_search(price,sign,value):
 		#priceitem=data[2]
 		data=data.split('"')
 		print (data)
-		priceitem = 0
+		priceitem = data[2]
+		print (priceitem)
+		priceitem=priceitem.strip(",")
+		print (priceitem)
 		try :
 			priceitem=int(priceitem)
 		except:
