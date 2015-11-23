@@ -99,10 +99,13 @@ def price_search(price,sign,value):
 	database_rw.open("rw.idx")
 	curs_rw=database_rw.cursor()
 
-
-
-
-
+	#locate cursor where price is (4)
+	#if v.startswith(price):
+		#if rID not in list:
+			#list.append()
+	
+	
+	
 	curs_rw.close()
 	database_rw.close()
 
@@ -137,6 +140,11 @@ def part_search(text):
 			list.append(key.decode("utf-8"))
 		iter=curs_rw.next()
 
+	#try and use _.startswith('word') helps a lot
+	#A = 'heloobelonie'
+	#if A.startswith('heloobelonie'):
+	#print(A)
+
 
 
 	curs_rw.close()
@@ -150,10 +158,16 @@ def part_search(text):
 
 def score_search(score,sign,value):
 	database_rw = db.DB()
-	database_rw.open("rw.idx")
+	database_rw.open("sc.idx") #I changed it to use the scores index
 	curs_rw=database_rw.cursor()
 
-
+	# NOTE: .get() only retrieving the value (rID)
+	#I'm not sure if we need to do while loop because i think when we use get() it should list all of them
+	#iter = cur.first()
+	if database.get(db'score') not in list:
+		list.append()
+	#iter = cur.next()
+	
 
 
 	curs_rw.close()
