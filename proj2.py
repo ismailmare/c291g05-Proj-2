@@ -445,6 +445,7 @@ def date_search(command,sign,date):
 		tempdata = tempdata.split(",")
 		timestamp= tempdata[3]
 		dateitem = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+		print (dateitem)
 		if sign =="=":
 			if date == dateitem:
 				list.append(key.decode("utf-8"))
