@@ -79,6 +79,8 @@ def full_search(text):
 		data = iter[1]
 		key=iter[0]
 		data=data.decode("utf-8")
+		data=re.sub('[^0-9a-zA-Z_]',' ',data)
+		data=data.lower()
 		data=data.split()
 		if text in data:
 			list.append(key.decode("utf-8"))
@@ -136,6 +138,8 @@ def part_search(text):
 		data = iter[1]
 		key=iter[0]
 		data=data.decode("utf-8")
+		data=re.sub('[^0-9a-zA-Z_]',' ',data)
+		data=data.lower()
 		if text in data:
 			list.append(key.decode("utf-8"))
 		iter=curs_rw.next()
@@ -154,24 +158,41 @@ def part_search(text):
 
 
 
-
+ 
 
 def score_search(score,sign,value):
-	database_rw = db.DB()
-	database_rw.open("sc.idx") #I changed it to use the scores index
-	curs_rw=database_rw.cursor()
+	database_sc = db.DB()
+	database_sc.open("sc.idx") #I changed it to use the scores index
+	curs_sc=database_sc.cursor()
 
-	# NOTE: .get() only retrieving the value (rID)
+	#NOTe: .get() only retrieving the value (rID)
 	#I'm not sure if we need to do while loop because i think when we use get() it should list all of them
 	#iter = cur.first()
-	if database.get(db'score') not in list:
-		list.append()
+	#if database.get(db'score') not in list:
+	#	list.append()
 	#iter = cur.next()
-	
+	iter = curs_sc.first()
+	value=float(value)
+	while iter:
+		data=iter[1]
+		key=iter[0]
+		key = key.decode("utf-8")
+		key = float(key)
+		data = data.decode("utf-8")
+		if sign =='>':
+			if key>value:
+				list.append(data)
+		elif sign =='<':
+			if key<value:
+				list.append(data)
+		elif sign =='=':
+			if key==value:
+				list.append(data)
+		iter=curs_sc.next()
 
 
-	curs_rw.close()
-	database_rw.close()
+	curs_sc.close()
+	database_sc.close()
 	return
 
 def update_list():
@@ -217,40 +238,69 @@ def phase3():
 			break
 		query=query.split()
 		for i in range(len(query)):
-			update_list()
 			command=query[i]
 			if 'p:' in command:
+				update_list()
 				command=command[len('p:'):]
 				product_search(command)
 			elif 'r:' in command:
+				update_list()
 				command=command[len('r:'):]
 				review_search(command)
 			elif 'pprice' in command:
+				update_list()
 				price_search(command,query[i+1],query[i+2])
 			elif 'rdate' in command:
+				update_list()
 				date_search(command,query[i+1],query[i+2])
 			elif 'rscore' in command:
-				score_search(command,query[i+1],query[i+2])
+				update_list()
+				if len(command)> len('rscore'):
+					sign=command[len('rscore'):len(command)-1]
+					value=command[len('rscore')+1:len(command)]
+					command='rscore'
+					score_search(command,sign,value)
+				else:
+					score_search(command,query[i+1],query[i+2])
 			elif '%' in command:
+				update_list()
 				command=command.split('%')
 				command=command[0]
 				part_search(command)
 			else:
 				if ((len(command)>=3) and (command.isalnum()==True)):
+					update_list()
 					full_search(command)
 			list=set(list)
 			list=sorted(list)
-			check()
+			if len(command)>1:
+				check()
+
 
 		if len(new_list)==0:
+			new_list=sorted(new_list)
 			new_list=list
 		iter=curs_rw.first()
+		print(new_list)
 		while iter:
 			data = iter[1]
 			key=iter[0]
 			if key.decode("utf-8") in new_list:
 				print('\n')
-				print(data.decode("utf-8"))
+				data=data.decode("utf-8")
+				data=data.split('"')
+				print("product/productId: %s" %data[0])
+				print("product/title: %s" %data[1])
+				price=data[2].split(',')
+				print("product/price: %s" %price[1])
+				print("review/userId: %s" %price[2])
+				print("review/profileName: %s" %data[3])
+				stuff=data[4].split(',') 
+				print("review/helpfulness: %s" %stuff[1])
+				print("review/score: %s" %stuff[2])
+				print("review/time: %s" %stuff[3])
+				print("review/summary: %s" %data[5])
+				print("review/text: %s" %data[7])				
 			iter=curs_rw.next()
 
 
