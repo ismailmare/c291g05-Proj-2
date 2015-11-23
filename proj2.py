@@ -444,10 +444,25 @@ def date_search(command,sign,date):
 		tempdata=data[4]
 		tempdata = tempdata.split(",")
 		timestamp= tempdata[3]
-		print (timestamp)
-		print(datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S'))
-		iter=curs_rw.next()
+		dateitem = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S'))
+		if sign =="=":
+			if date == dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
 
+		elif sign == "<":
+			if date < dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		elif sign == ">":
+			if date > dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		else:
+			iter=curs_rw.next()
+
+	curs_rw.close()
+	database_rw.close()
 	return
 
 
