@@ -108,7 +108,6 @@ def reviews():
 	f.close()
 	return
 
-
 def rterms():
 	file=open('file.txt','r')
 	target = open('rterms.txt','w')
@@ -396,9 +395,10 @@ def price_search(price,sign,value):
 	while iter:
 		key=iter[0]
 		data=iter[1]
-		PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
-		PATTERN.split(data)[1::2]
-		priceitem=data[2]
+		data=data.decode("utf-8")
+		data=data.split('"')
+		priceitem = data[2]
+		priceitem=priceitem.strip(",")
 		try :
 			priceitem=int(priceitem)
 		except:
@@ -432,7 +432,38 @@ def price_search(price,sign,value):
 def date_search(command,sign,date):
 	#read in time
 	#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+	database_rw = db.DB()
+	database_rw.open("rw.rdx")
+	curs_rw=database_rw.cursor()
+	iter = curs_rw.first()
+	while iter:
+		key=iter[0]
+		data=iter[1]
+		data=data.decode("utf-8")
+		data=data.split('"')
+		tempdata=data[4]
+		tempdata = tempdata.split(",")
+		timestamp= tempdata[3]
+		dateitem = datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+		print (dateitem)
+		if sign =="=":
+			if date == dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
 
+		elif sign == "<":
+			if date < dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		elif sign == ">":
+			if date > dateitem:
+				list.append(key.decode("utf-8"))
+				iter=curs_rw.next()
+		else:
+			iter=curs_rw.next()
+
+	curs_rw.close()
+	database_rw.close()
 	return
 
 
