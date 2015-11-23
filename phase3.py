@@ -129,7 +129,6 @@ def price_search(price,sign,value):
 				elif sign == "<":
 						if priceitem < value:
 								list.append(key.decode("utf-8"))
-								pri
 				elif sign == ">":
 						if priceitem>value:
 								list.append(key.decode("utf-8"))
