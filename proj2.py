@@ -445,7 +445,8 @@ def date_search(command,sign,date):
 		tempdata = tempdata.split(",")
 		timestamp= tempdata[3]
 		print (timestamp)
-		#print(datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S'))
+		print(datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S'))
+		iter=curs_rw.next()
 
 	return
 
