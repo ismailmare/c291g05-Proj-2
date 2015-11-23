@@ -399,9 +399,9 @@ def price_search(price,sign,value):
 		#PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
 		#PATTERN.split(data)[1::2]
 		#priceitem=data[2]
-		data.split('"')
+		data=data.split('"')
 		print (data)
-		priceitem = 0
+		priceitem = 
 		try :
 			priceitem=int(priceitem)
 		except:
