@@ -441,7 +441,7 @@ def date_search(command,sign,date):
 		data=iter[1]
 		data=data.decode("utf-8")
 		data=data.split('"')
-		tempdata=data[5]
+		tempdata=data[4]
 		tempdata = tempdata.split(",")
 		print (tempdata)
 
