@@ -1,4 +1,33 @@
+# Assignment:           Mini Project 1
+# Due Date:             October, 27 2015
+# Name:                 Ismail Mare, Janice Loo, Preyanshu Kumar
+# Unix ID:              imare, jloo, preyansh
+# StudentID:            1388973, 1359624, 1395321
+# Lecture Section:      B1
+# Instructor:           Davood Rafiei
+#---------------------------------------------------------------
+#
+ 
+#importing necessary libraries
+import sys
+import datetime
+import math
+import random
+import time
+import string
+import sys
+import subprocess
+import re
+from csv import reader
+from bsddb3 import db
 
+
+
+
+
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+#---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 #---------------------------------------------------------------
@@ -49,7 +78,9 @@ def full_search(text):
 	while iter:
 		data = iter[1]
 		key=iter[0]
-		if text in data.decode("utf-8"):
+		data=data.decode("utf-8")
+		data=data.split()
+		if text in data:
 			list.append(key.decode("utf-8"))
 		iter=curs_rw.next()
 
@@ -92,18 +123,24 @@ def date_search(command,sign,date):
 
 
 
-def part_search(part_word):
+def part_search(text):
 	database_rw = db.DB()
 	database_rw.open("rw.idx")
-	curs_rw=database_rt.cursor()
+	curs_rw=database_rw.cursor()
 
-
+	iter = curs_rw.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
+		data=data.decode("utf-8")
+		if text in data:
+			list.append(key.decode("utf-8"))
+		iter=curs_rw.next()
 
 
 
 	curs_rw.close()
 	database_rw.close()
-
 	return
 
 
@@ -124,6 +161,7 @@ def score_search(score,sign,value):
 	return
 
 def update_list():
+	global new_
 	global list
 	if len(list)==0:
 		return
@@ -139,22 +177,16 @@ def check():
 	if len(new_list)==0:
 		return
 	update=[]
-	if len(list)>=len(new_list):
-		for i in list:
-			if i in new_list:
-				update.append(i)
-	else:
-		for i in new_list:
-			if i in list:
-				update.append(i)
+	for i in list:
+		if i in new_list:
+			update.append(i)
 	new_list=update
-	list=new_list
+	list=[]
 	return
 
 def phase3():
-
 	database_rw = db.DB()
-	database_rw.open("rw.rdx")
+	database_rw.open("rw.idx")
 	curs_rw=database_rw.cursor()
 	global new_list
 	new_list=[]
@@ -186,6 +218,8 @@ def phase3():
 			elif 'rscore' in command:
 				score_search(command,query[i+1],query[i+2])
 			elif '%' in command:
+				command=command.split('%')
+				command=command[0]
 				part_search(command)
 			else:
 				if ((len(command)>=3) and (command.isalnum()==True)):
@@ -194,11 +228,13 @@ def phase3():
 			list=sorted(list)
 			check()
 
+		if len(new_list)==0:
+			new_list=list
 		iter=curs_rw.first()
 		while iter:
 			data = iter[1]
 			key=iter[0]
-			if key.decode("utf-8") in list:
+			if key.decode("utf-8") in new_list:
 				print('\n')
 				print(data.decode("utf-8"))
 			iter=curs_rw.next()
@@ -219,23 +255,6 @@ def phase3():
 
 
 def main():
-	#	This is an example of reading file from stdin and printing contents
-	try:
-		org_file = open(sys.argv[1])
-	except:
-		print("\n"+"Input file not provided!"+"\n")
-		return
-	replaced_file = open('file.txt','w')
-
-	for line in org_file:
-		line=line.replace('"','&quot;')
-		line=line.replace("\\","\\\\")
-		replaced_file.write(line)
-	org_file.close()
-	replaced_file.close()
-
-	phase1()
-	phase2()
 	phase3()
 	subprocess.call('rm rt.idx',shell=True)
 	subprocess.call('rm pt.idx',shell=True)

@@ -392,7 +392,7 @@ def price_search(price,sign,value):
 	database_rw = db.DB()
 	database_rw.open("rw.rdx")
 	curs_rw=database_rw.cursor()
-	iter = curs_pt.first()
+	iter = curs_rw.first()
 	while iter:
 		key=iter[0]
 		data=iter[1]
