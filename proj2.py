@@ -400,9 +400,9 @@ def price_search(price,sign,value):
 		#PATTERN.split(data)[1::2]
 		#priceitem=data[2]
 		data=data.split('"')
-		print (data)
+		#print (data)
 		priceitem = data[2]
-		print (priceitem)
+		#print (priceitem)
 		priceitem=priceitem.strip(",")
 		print (priceitem)
 		try :
