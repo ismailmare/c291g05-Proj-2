@@ -108,7 +108,6 @@ def reviews():
 	f.close()
 	return
 
-
 def rterms():
 	file=open('file.txt','r')
 	target = open('rterms.txt','w')
@@ -396,9 +395,12 @@ def price_search(price,sign,value):
 	while iter:
 		key=iter[0]
 		data=iter[1]
-		PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
-		PATTERN.split(data)[1::2]
-		priceitem=data[2]
+		#PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
+		#PATTERN.split(data)[1::2]
+		#priceitem=data[2]
+		data.split('"')
+		print data
+		priceitem = 0
 		try :
 			priceitem=int(priceitem)
 		except:
