@@ -10,7 +10,7 @@
  
 #importing necessary libraries
 import sys
-import datetime
+from datetime import datetime
 import math
 import random
 import time
@@ -95,33 +95,102 @@ def full_search(text):
 
 
 
+
 def price_search(price,sign,value):
-	#need to read in price in database
-	database_rw = db.DB()
-	database_rw.open("rw.idx")
-	curs_rw=database_rw.cursor()
+		#The 8th query is the same as the third query except the query 
+		#only returns those records where price is present and has a 
+		#value less than 60. Note that there is no index on the price 
+		#field; this field is checked after retrieving the candidate 
+		#records using conditions on which indexes are available 
+		#(e.g. terms) need to read in price in database
 
-	#locate cursor where price is (4)
-	#if v.startswith(price):
-		#if rID not in list:
-			#list.append()
-	
-	
-	
-	curs_rw.close()
-	database_rw.close()
+		database_rw = db.DB()
+		database_rw.open("rw.idx")
+		curs_rw=database_rw.cursor()
+		iter = curs_rw.first()
+		value=float(value)
+		while iter:
+				key=iter[0]
+				data=iter[1]
+				data=data.decode("utf-8")
+				data=data.split('"')
+				priceitem = data[2]
+				priceitem=priceitem.strip(",")
 
-	return
+				try :
+						priceitem=float(priceitem)
+				except:
+						iter=curs_rw.next()
+						continue
+
+				if sign =="=":
+						if value == priceitem:
+								list.append(key.decode("utf-8"))
+				elif sign == "<":
+						if priceitem < value:
+								list.append(key.decode("utf-8"))
+								pri
+				elif sign == ">":
+						if priceitem>value:
+								list.append(key.decode("utf-8"))
+								
+				iter=curs_rw.next()
+
+
+		curs_rw.close()
+		database_rw.close()
+
+		return
+
+
+
 
 
 
 
 
 def date_search(command,sign,date):
-	#read in time
-	#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+		#read in time
+		#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+		database_rw = db.DB()
+		database_rw.open("rw.idx")
+		curs_rw=database_rw.cursor()
+		iter = curs_rw.first()
 
-	return
+
+
+		date = datetime.strptime(date,'%Y/%m/%d')
+		while iter:
+				key=iter[0]
+				data=iter[1]
+				data=data.decode("utf-8")
+				data=data.split('"')
+				tempdata=data[4]
+				tempdata = tempdata.split(",")
+				timestamp= tempdata[3]
+				dateitem = datetime.fromtimestamp(int(timestamp))                
+			
+				if sign =="=":
+						if date == dateitem:
+							list.append(key.decode("utf-8"))
+								
+				elif sign == ">":
+					if dateitem>date:
+						list.append(key.decode("utf-8"))
+								
+				elif sign == "<":
+						if dateitem<date:
+							print (dateitem)
+							print(date)
+							list.append(key.decode("utf-8"))
+								
+				iter=curs_rw.next()
+
+		curs_rw.close()
+		database_rw.close()
+		return
+
+
 
 
 
@@ -134,6 +203,7 @@ def part_search(text):
 	curs_rw=database_rw.cursor()
 
 	iter = curs_rw.first()
+	text=' '+text
 	while iter:
 		data = iter[1]
 		key=iter[0]
@@ -243,45 +313,73 @@ def phase3():
 				update_list()
 				command=command[len('p:'):]
 				product_search(command)
+				check()
+
 			elif 'r:' in command:
 				update_list()
 				command=command[len('r:'):]
 				review_search(command)
+				check()
+
 			elif 'pprice' in command:
 				update_list()
-				price_search(command,query[i+1],query[i+2])
+				if len(command)> len('pprice'):
+					sign=command[len('pprice'):len("pprice")+1]
+					value=command[len('pprice')+1:len(command)]
+					command='pprice'
+					price_search(command,sign,value)
+				else:
+					price_search(command,query[i+1],query[i+2])
+				check()
+
 			elif 'rdate' in command:
 				update_list()
-				date_search(command,query[i+1],query[i+2])
+				if len(command)> len('rdate'):
+					sign=command[len('rdate'):len("rdate")+1]
+					value=command[len('rdate')+1:len(command)]
+					command='rdate'
+					date_search(command,sign,value)
+				else:
+					date_search(command,query[i+1],query[i+2])
+				check()
+
 			elif 'rscore' in command:
 				update_list()
 				if len(command)> len('rscore'):
-					sign=command[len('rscore'):len(command)-1]
+					sign=command[len('rscore'):len("rscore")+1]
 					value=command[len('rscore')+1:len(command)]
 					command='rscore'
 					score_search(command,sign,value)
 				else:
 					score_search(command,query[i+1],query[i+2])
+				check()
+
 			elif '%' in command:
 				update_list()
 				command=command.split('%')
 				command=command[0]
 				part_search(command)
+				check()
 			else:
 				if ((len(command)>=3) and (command.isalnum()==True)):
 					update_list()
 					full_search(command)
+					check()
 			list=set(list)
 			list=sorted(list)
-			if len(command)>1:
-				check()
+
+			#try:
+				#command = float(command)
+			#except:
+				#if len(command)>2:
+					#check()
+
 
 
 		if len(new_list)==0:
 			new_list=sorted(new_list)
 			new_list=list
 		iter=curs_rw.first()
-		print(new_list)
 		while iter:
 			data = iter[1]
 			key=iter[0]
