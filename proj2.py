@@ -396,15 +396,9 @@ def price_search(price,sign,value):
 		key=iter[0]
 		data=iter[1]
 		data=data.decode("utf-8")
-		#PATTERN = re.compile(r'''((?:[^,"']|"[^"]*"|'[^']*')+)''')
-		#PATTERN.split(data)[1::2]
-		#priceitem=data[2]
 		data=data.split('"')
-		#print (data)
 		priceitem = data[2]
-		#print (priceitem)
 		priceitem=priceitem.strip(",")
-		print (priceitem)
 		try :
 			priceitem=int(priceitem)
 		except:
