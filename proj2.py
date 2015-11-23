@@ -432,6 +432,16 @@ def price_search(price,sign,value):
 def date_search(command,sign,date):
 	#read in time
 	#time=time.strftime("%D %H:%M", time.localtime(int(time)))
+	database_rw = db.DB()
+	database_rw.open("rw.rdx")
+	curs_rw=database_rw.cursor()
+	iter = curs_rw.first()
+	while iter:
+		key=iter[0]
+		data=iter[1]
+		data=data.decode("utf-8")
+		data=data.split('"')
+		print (data)
 
 	return
 
