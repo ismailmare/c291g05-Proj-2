@@ -443,7 +443,10 @@ def date_search(command,sign,date):
 		data=data.split('"')
 		tempdata=data[4]
 		tempdata = tempdata.split(",")
-		print (tempdata)
+		timestamp= tempdata[3]
+		print (timestamp)
+		#print(datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+)
 
 	return
 
