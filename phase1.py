@@ -19,6 +19,7 @@ import sys
 import subprocess
 import re
 from bsddb3 import db
+from sys import stdin
 
 
 
@@ -188,8 +189,9 @@ def phase1():
 
 def main():
 	#	This is an example of reading file from stdin and printing contents
+	#print(stdin.read())
 	try:
-		org_file = open(sys.argv[1])
+		org_file = stdin.read()#open(sys.argv[1])
 	except:
 		print("\n"+"Input file not provided!"+"\n")
 		return
@@ -199,7 +201,7 @@ def main():
 		line=line.replace('"','&quot;')
 		line=line.replace("\\","\\\\")
 		replaced_file.write(line)
-	org_file.close()
+	#org_file.close()
 	replaced_file.close()
 
 	phase1()

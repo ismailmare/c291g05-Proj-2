@@ -95,13 +95,14 @@ def phase2():
 	database_rt.open("rt.idx",None,db.DB_BTREE,db.DB_CREATE)
 	database_sc.open("sc.idx",None,db.DB_BTREE,db.DB_CREATE)
 
-	db_load_prep("scores.txt") #Now files loaded for db called: scores_load.txt
-	db_load_prep("pterms.txt") #Now files loaded for db called: pterms_load.txt
-	db_load_prep("rterms.txt") #Now files loaded for db called: rterms_load.txt
-	db_load_prep_reviews("reviews.txt") #Now files loaded for db called: reviews_load.txt
+	#db_load_prep("scores.txt") #Now files loaded for db called: scores_load.txt
+	#db_load_prep("pterms.txt") #Now files loaded for db called: pterms_load.txt
+	#db_load_prep("rterms.txt") #Now files loaded for db called: rterms_load.txt
+	#db_load_prep_reviews("reviews.txt") #Now files loaded for db called: reviews_load.txt
 
 	curs_rw=database_rw.cursor()
-	subprocess.call('db_load -f reviews_load.txt -T -t hash rw.idx',shell=True)
+	#subprocess.call('db_load -f reviews_load.txt -T -t hash rw.idx',shell=True)
+	subprocess.call('cat reviews.txt |./perl_script.pl | db_load -T -t hash rw.idx',shell=True)
 	#test#################
 	#iter = curs_rw.first()
 	#while iter:
@@ -113,8 +114,8 @@ def phase2():
 	database_rw.close()
 
 	curs_rt=database_rt.cursor()
-	subprocess.call('db_load -f rterms_load.txt -T -t btree rt.idx',shell=True)
-	
+	#subprocess.call('db_load -f rterms_load.txt -T -t btree rt.idx',shell=True)
+	subprocess.call('cat rterms.txt |./perl_script.pl | db_load -T -t btree rt.idx',shell=True)
 	#test#################
 	#iter = curs_rt.first()
 	#while iter:
@@ -126,8 +127,8 @@ def phase2():
 	database_rt.close()
 
 	curs_pt=database_pt.cursor()
-	subprocess.call('db_load -f pterms_load.txt -T -t btree pt.idx',shell=True)
-	
+	#subprocess.call('db_load -f pterms_load.txt -T -t btree pt.idx',shell=True)
+	subprocess.call('cat pterms.txt |./perl_script.pl | db_load -T -t btree pt.idx',shell=True)
 	#test#################
 	#iter = curs_pt.first()
 	#while iter:
@@ -139,8 +140,8 @@ def phase2():
 	database_pt.close()
 
 	curs_sc=database_sc.cursor()
-	subprocess.call('db_load -f scores_load.txt -T -t btree sc.idx',shell=True)
-	
+	#subprocess.call('db_load -f scores_load.txt -T -t btree sc.idx',shell=True)
+	subprocess.call('cat scores.txt |./perl_script.pl | db_load -T -t btree sc.idx',shell=True)
 	#test#################
 	#iter = curs_sc.first()
 	#while iter:

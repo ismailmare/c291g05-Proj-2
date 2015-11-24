@@ -129,7 +129,6 @@ def price_search(price,sign,value):
 				elif sign == "<":
 						if priceitem < value:
 								list.append(key.decode("utf-8"))
-								pri
 				elif sign == ">":
 						if priceitem>value:
 								list.append(key.decode("utf-8"))
@@ -193,41 +192,37 @@ def date_search(command,sign,date):
 
 
 
-
-
-
-
 def part_search(text):
-	database_rw = db.DB()
-	database_rw.open("rw.idx")
-	curs_rw=database_rw.cursor()
-
-	iter = curs_rw.first()
-	text=' '+text
+	database_rt = db.DB()
+	database_rt.open("rt.idx")
+	curs_rt=database_rt.cursor()
+	text=text.lower()
+	iter = curs_rt.first()
 	while iter:
 		data = iter[1]
 		key=iter[0]
-		data=data.decode("utf-8")
-		data=re.sub('[^0-9a-zA-Z_]',' ',data)
-		data=data.lower()
-		if text in data:
-			list.append(key.decode("utf-8"))
-		iter=curs_rw.next()
+		if text == key.decode("utf-8")[:len(text)]:
+			list.append(data.decode("utf-8"))
+		iter=curs_rt.next()
 
-	#try and use _.startswith('word') helps a lot
-	#A = 'heloobelonie'
-	#if A.startswith('heloobelonie'):
-	#print(A)
+	curs_rt.close()
+	database_rt.close()
 
+	database_pt = db.DB()
+	database_pt.open("pt.idx")
+	curs_pt=database_pt.cursor()
 
+	iter = curs_pt.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
+		if text == key.decode("utf-8")[:len(text)]:
+			list.append(data.decode("utf-8"))
+		iter=curs_pt.next()
 
-	curs_rw.close()
-	database_rw.close()
+	curs_pt.close()
+	database_pt.close()
 	return
-
-
-
-
  
 
 def score_search(score,sign,value):
@@ -268,6 +263,8 @@ def score_search(score,sign,value):
 def update_list():
 	global new_
 	global list
+	list=set(list)
+	list=sorted(list)
 	if len(list)==0:
 		return
 	else:
@@ -279,6 +276,8 @@ def update_list():
 def check():
 	global new_list
 	global list
+	list=set(list)
+	list=sorted(list)
 	if len(new_list)==0:
 		return
 	update=[]
@@ -300,6 +299,7 @@ def phase3():
 	global query
 	print("\nWelcome to the Query Interface\n")
 	while True:
+		count=0
 		list=[]
 		new_list=[]
 		query=input("\nPlease enter your Query, (q) to quit: ")
@@ -310,18 +310,21 @@ def phase3():
 		for i in range(len(query)):
 			command=query[i]
 			if 'p:' in command:
+				count+=1
 				update_list()
 				command=command[len('p:'):]
 				product_search(command)
 				check()
 
 			elif 'r:' in command:
+				count+=1
 				update_list()
 				command=command[len('r:'):]
 				review_search(command)
 				check()
 
 			elif 'pprice' in command:
+				count+=1
 				update_list()
 				if len(command)> len('pprice'):
 					sign=command[len('pprice'):len("pprice")+1]
@@ -333,6 +336,7 @@ def phase3():
 				check()
 
 			elif 'rdate' in command:
+				count+=1
 				update_list()
 				if len(command)> len('rdate'):
 					sign=command[len('rdate'):len("rdate")+1]
@@ -344,6 +348,7 @@ def phase3():
 				check()
 
 			elif 'rscore' in command:
+				count+=1
 				update_list()
 				if len(command)> len('rscore'):
 					sign=command[len('rscore'):len("rscore")+1]
@@ -355,6 +360,7 @@ def phase3():
 				check()
 
 			elif '%' in command:
+				count+=1
 				update_list()
 				command=command.split('%')
 				command=command[0]
@@ -362,12 +368,12 @@ def phase3():
 				check()
 			else:
 				if ((len(command)>=3) and (command.isalnum()==True)):
+					count+=1
 					update_list()
 					full_search(command)
 					check()
 			list=set(list)
 			list=sorted(list)
-
 			#try:
 				#command = float(command)
 			#except:
@@ -375,12 +381,14 @@ def phase3():
 					#check()
 
 
-
-		if len(new_list)==0:
+		if len(new_list)==0 and (count==1):
 			new_list=sorted(new_list)
 			new_list=list
 		iter=curs_rw.first()
 		while iter:
+			if len(new_list)==0:
+				print("\n No Reviews Found \n")
+				break
 			data = iter[1]
 			key=iter[0]
 			if key.decode("utf-8") in new_list:
@@ -400,10 +408,6 @@ def phase3():
 				print("review/summary: %s" %data[5])
 				print("review/text: %s" %data[7])				
 			iter=curs_rw.next()
-
-
-
-
 
 	print("\nHave a nice day!\n")
 	curs_rw.close()
