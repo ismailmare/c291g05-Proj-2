@@ -70,26 +70,35 @@ def product_search(text):
 
 
 def full_search(text):
-	database_rw = db.DB()
-	database_rw.open("rw.idx")
-	curs_rw=database_rw.cursor()
-
-	iter = curs_rw.first()
+	database_rt = db.DB()
+	database_rt.open("rt.idx")
+	curs_rt=database_rt.cursor()
+	text=text.lower()
+	iter = curs_rt.first()
 	while iter:
 		data = iter[1]
 		key=iter[0]
-		data=data.decode("utf-8")
-		data=re.sub('[^0-9a-zA-Z_]',' ',data)
-		data=data.lower()
-		data=data.split()
-		if text in data:
-			list.append(key.decode("utf-8"))
-		iter=curs_rw.next()
+		if text == key.decode("utf-8"):
+			list.append(data.decode("utf-8"))
+		iter=curs_rt.next()
 
+	curs_rt.close()
+	database_rt.close()
 
+	database_pt = db.DB()
+	database_pt.open("pt.idx")
+	curs_pt=database_pt.cursor()
 
-	curs_rw.close()
-	database_rw.close()
+	iter = curs_pt.first()
+	while iter:
+		data = iter[1]
+		key=iter[0]
+		if text == key.decode("utf-8"):
+			list.append(data.decode("utf-8"))
+		iter=curs_pt.next()
+
+	curs_pt.close()
+	database_pt.close()
 	return
 
 
